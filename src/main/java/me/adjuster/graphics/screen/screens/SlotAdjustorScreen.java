@@ -57,7 +57,7 @@ public class SlotAdjustorScreen extends Screen {
                    for(int i=0;i<dropperContentResults.length;i++){
                        dropperContentResults[i].setText(MathUtil.toDropper(bestOption[i]));
                    }
-                   average.setText("Der Druchschnittle Gewinn betraegt "+slot.getExpectedProfit(Arrays.asList(bestOption)) +"$ | Dies ist "+Math.abs(slot.getExpectedProfit(Arrays.asList(bestOption))-target)+"$ von deinem genauem Ziel entfernt");
+                   average.setText("Der Durchschnittliche Gewinn betraegt "+slot.getExpectedProfit(Arrays.asList(bestOption)) +"$ | Dies ist "+Math.abs(slot.getExpectedProfit(Arrays.asList(bestOption))-target)+"$ von deinem genauem Ziel entfernt");
                }catch (Exception exception){}
            }
        });
