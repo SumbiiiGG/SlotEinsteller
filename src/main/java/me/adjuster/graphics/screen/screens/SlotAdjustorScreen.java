@@ -6,112 +6,147 @@ import me.adjuster.graphics.screen.Screen;
 import me.adjuster.slot.MathUtil;
 import me.adjuster.slot.Slot;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class SlotAdjustorScreen extends Screen {
-    int dropper;
-   public SlotAdjustorScreen(int dropper){
-       this.dropper=dropper;
-       JLabel question1 = new JLabel("Wie Hoch sind die Gewinne deiner Lampen?");
-       JLabel question2 = new JLabel("Wie hoch sollte der durchschnittliche Gewinn sein?");
-       JLabel filler = new JLabel("Antwort ");
-       JButton calculate = new JButton("Berechnen");
-       JScrollBar divider = new JScrollBar();
-       JButton newslot = new JButton("Neue Slot");
-       JLabel chances = new JLabel("Exacte Chancen dass diese Menge Lampen an gehen");
-       JLabel settings = new JLabel("Deine Dropper muessen so eingestellt werden");
-       JLabel average = new JLabel("");
-       JTextField[] answers1 = new JTextField[dropper];
-       JTextField answer2 = new JTextField();
-       JLabel[] chanceResults = new JLabel[dropper];
-       JLabel[] dropperContentResults = new JLabel[dropper];
+    int lamps;
+    JTextField[] prices;
+    JTextField[] results;
+    JTextField wantedAverageTextField = new JTextField("");
 
-       //Add action Listeners
-       newslot.addActionListener(new ActionListener() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-               SlotAdjuster.currentScreen = new StartScreen();
-           }
-       });
-       calculate.addActionListener(new ActionListener() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-               try {
-                   List<Float> prices = new ArrayList<>();
-                   for(JTextField field : answers1){
-                       prices.add(Float.parseFloat(field.getText()));
-                   }
-                   float target = Float.parseFloat(answer2.getText());
-                   Slot slot = new Slot(prices);
-                   SlotCalculator slotCalculator = new SlotCalculator();
-                   Float[] bestOption = slotCalculator.getClosedOption(slot,target);
-                   List<Float> exactChances = slot.getChancesExact(Arrays.asList(bestOption), slot.getAllCombinations());
-                   for(int i=0;i<chanceResults.length;i++){
-                      chanceResults[i].setText((exactChances.get(i+1)*100)+"%");
-                   }
-                   for(int i=0;i<dropperContentResults.length;i++){
-                       dropperContentResults[i].setText(MathUtil.toDropper(bestOption[i]));
-                   }
-                   average.setText("Der Durchschnittliche Gewinn betraegt "+slot.getExpectedProfit(Arrays.asList(bestOption)) +"$ | Dies ist "+Math.abs(slot.getExpectedProfit(Arrays.asList(bestOption))-target)+"$ von deinem genauem Ziel entfernt");
-               }catch (Exception exception){}
-           }
-       });
+    public SlotAdjustorScreen(int lamps) {
+        this.lamps = lamps;
+        this.prices = new JTextField[lamps];
+        this.results = new JTextField[lamps];
+    }
 
-       //Set Positions and add to screen
-       for(int i=1;i<=dropper;i++){
-           JLabel lampNumber = new JLabel("Lampe  "+i);
-           JLabel lampNumber1 = new JLabel("Lampe  "+i);
-           JLabel dropperNumber = new JLabel("Dropper "+i);
-           JLabel dropperSetting = new JLabel("");
-           JLabel chanceResult = new JLabel("");
-           JTextField lampAnswer = new JTextField();
-           lampNumber.setBounds(5,i*20+10,100,20);
-           lampNumber1.setBounds(320,i*20+10,100,20);
-           chanceResult.setBounds(390,i*20+10,100,20);
-           dropperNumber.setBounds(320,i*20+10+dropper*20+40,100,20);
-           dropperSetting.setBounds(390,i*20+10+dropper*20+40,400,20);
-           lampAnswer.setBounds(70,i*20+10,100,20);
-           answers1[i-1] = lampAnswer;
-           dropperContentResults[i-1] = dropperSetting;
-           chanceResults[i-1] = chanceResult;
+    @Override
+    public void paint(Graphics g) {
+        SlotAdjuster.window.getContentPane().removeAll();
+        Font buttonFont = new Font("buttom", Font.BOLD, getWindowHeight() / 28);
+        int startOffset = getWindowHeight() / 7;
+        int fontsize = (getWindowHeight() - startOffset * 5) / lamps;
+        Font size = new Font("Size", Font.BOLD, fontsize);
+        if (lamps < 8) {
+            fontsize = (getWindowHeight() - startOffset * 5) / 8;
+        }
+        try {
+            SlotAdjuster.window.revalidate();
+            URL backgroundUrl = getClass().getClassLoader().getResource("sloteinstellen.png");
+            Image background = ImageIO.read(backgroundUrl);
+            g.drawImage(background, 0, 0, SlotAdjuster.window.getWidth(), SlotAdjuster.window.getHeight(), null);
+        } catch (Exception e) {
+        }
 
+        wantedAverageTextField.setForeground(Color.WHITE);
+        wantedAverageTextField.setBackground(Color.LIGHT_GRAY);
+        if (getWindowHeight() > 1000) {
+            wantedAverageTextField.setBounds(getWindowWidth() / 100, getWindowHeight() - (getWindowHeight() / 4) + 20, getWindowWidth() / 3, getWindowHeight() / 10);
+        } else {
+            wantedAverageTextField.setBounds(getWindowWidth() / 100, getWindowHeight() - (3 * getWindowHeight() / 11) + 5, getWindowWidth() / 3, getWindowHeight() / 10);
+        }
+        wantedAverageTextField.setFont(new Font("averadge", Font.BOLD, getWindowHeight() / 22));
+        addElement(wantedAverageTextField);
+        wantedAverageTextField.repaint();
+        addButtons(buttonFont,g);
+        addPriceFields(size);
+        super.paint(g);
+    }
 
-           addElement(lampAnswer);
-           addElement(dropperNumber);
-           addElement(lampNumber1);
-           addElement(lampNumber);
-           addElement(dropperSetting);
-           addElement(chanceResult);
-       }
-       average.setBounds(320,dropper*20+10+dropper*20+70,1000,20);
-       divider.setBounds(300,0,20,getWindowHeight());
-       chances.setBounds(320,5,450,20);
-       question1.setBounds(5,5,300,20);
-       question2.setBounds(5,dropper*20+40,300,20);
-       filler.setBounds(5,dropper*20+60,100,20);
-       answer2.setBounds(70,dropper*20+60,100,20);
-       calculate.setBounds(5,dropper*20+80,170,20);
-       newslot.setBounds(5,dropper*20+110,170,20);
-       settings.setBounds(320,dropper*20+40,300,20);
+    public void calculateResults(Font font, float target) {
 
-       addElement(divider);
-       addElement(chances);
-       addElement(question1);
-       addElement(question2);
-       addElement(answer2);
-       addElement(filler);
-       addElement(calculate);
-       addElement(newslot);
-       addElement(settings);
-       addElement(average);
+        SlotCalculator slotCalculator = new SlotCalculator();
+        List<Float> winnable = new ArrayList<>();
+        for (int i = 0; i < prices.length; i++) {
+            winnable.add(Float.parseFloat(prices[i].getText().split(":")[1].replace(" ", "")));
+        }
+        System.out.println("W:" + winnable);
+        Float[] bestOption = slotCalculator.getClosedOption(new Slot(winnable), target);
 
-       SlotAdjuster.window.revalidate();
-       SlotAdjuster.window.repaint();
-   }
+        int startOffset = getWindowHeight() / 7 + 10;
+        int dist = (getWindowHeight() - startOffset * 2) / (lamps + 4);
+        for (int i = 0; i < lamps; i++) {
 
+            results[i] = new JTextField("Dropper " + (i + 1) + ":  " + MathUtil.toDropper(bestOption[i]));
+            results[i].setText("Dropper " + (i + 1) + ":  " + MathUtil.toDropper(bestOption[i]));
+
+            results[i].setBounds(getWindowWidth() / 2, startOffset + i * dist, getWindowWidth() / 3, dist);
+
+            addElement(results[i]);
+            results[i].setBackground(Color.LIGHT_GRAY);
+            results[i].setForeground(Color.WHITE);
+            results[i].setFont(font);
+            results[i].setEditable(false);
+            results[i].repaint();
+        }
+        Slot slot = new Slot(winnable);
+        JTextField averadge = new JTextField("" + (int) slot.getExpectedProfit(Arrays.asList(bestOption)) + "$");
+        averadge.setEditable(false);
+        if (getWindowHeight() > 1000) {
+            averadge.setBounds(getWindowWidth() / 2, getWindowHeight() - (getWindowHeight() / 4) + 20, getWindowWidth() / 3, getWindowHeight() / 10);
+        } else {
+            averadge.setBounds(getWindowWidth() / 2, getWindowHeight() - (3 * getWindowHeight() / 11) + 5, getWindowWidth() / 3, getWindowHeight() / 10);
+        }
+        averadge.setFont(new Font("s", Font.BOLD, getWindowHeight() / 22));
+        averadge.setForeground(Color.WHITE);
+        averadge.setBackground(Color.LIGHT_GRAY);
+        addElement(averadge);
+        averadge.repaint();
+
+    }
+
+    public void addPriceFields(Font font) {
+        int startOffset = getWindowHeight() / 7 + 10;
+        int dist = (getWindowHeight() - startOffset * 2) / (lamps + 4);
+        for (int i = 0; i < lamps; i++) {
+            if (prices[i] == null) {
+                prices[i] = new JTextField("Lampe " + (i + 1) + ":");
+            }
+            prices[i].setBounds(getWindowWidth() / 100, startOffset + i * dist, getWindowWidth() / 3, dist);
+            addElement(prices[i]);
+            prices[i].setBackground(Color.LIGHT_GRAY);
+            prices[i].setForeground(Color.WHITE);
+            prices[i].setFont(font);
+            prices[i].repaint();
+        }
+    }
+
+    public void addButtons(Font buttonFont,Graphics g) {
+        JButton back = new JButton("Zur\u00fcck");
+        back.setBackground(Color.GRAY);
+        back.setForeground(Color.WHITE);
+        back.setFont(buttonFont);
+        back.setBounds(getWindowWidth() / 100, getWindowHeight() - (getWindowHeight() / 8), (int) (getWindowWidth() / 8 * 3 * 0.4), (int) ((getWindowWidth() / 12) * 0.4));
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearWindow();
+                setCurrentScreen(new StartScreen());
+            }
+        });
+        addElement(back);
+        back.repaint();
+        JButton calculateButton = new JButton("Berechnen");
+        calculateButton.setBackground(Color.GRAY);
+        calculateButton.setForeground(Color.WHITE);
+        calculateButton.setFont(buttonFont);
+        calculateButton.setBounds(getWindowWidth() / 100 + getWindowWidth() / 3 - (int) (getWindowWidth() / 8 * 3 * 0.4), getWindowHeight() - (getWindowHeight() / 8), (int) (getWindowWidth() / 8 * 3 * 0.4), (int) ((getWindowWidth() / 12) * 0.4));
+        calculateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                paint(g);
+                calculateResults(buttonFont, Float.parseFloat(wantedAverageTextField.getText()));
+            }
+        });
+        addElement(calculateButton);
+        calculateButton.repaint();
+    }
 }

@@ -3,39 +3,87 @@ package me.adjuster.graphics.screen.screens;
 import me.adjuster.SlotAdjuster;
 import me.adjuster.graphics.screen.Screen;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
 public class StartScreen extends Screen {
-    public StartScreen(){
-        clearWindow();
-        JLabel question = new JLabel("Wie viele Lampen hat deine Slot?");
-        JTextField answer = new JTextField();
-        JButton next = new JButton("Weiter");
+    public StartScreen() {
+        SlotAdjuster.window.repaint();
+    }
 
-        next.addActionListener(new ActionListener() {
+    @Override
+    public void paint(Graphics g) {
+
+        Font size = new Font("s", Font.BOLD, getWindowHeight() / 16);
+        SlotAdjuster.window.getContentPane().removeAll();
+        SlotAdjuster.window.revalidate();
+        try {
+            SlotAdjuster.window.revalidate();
+            URL backgroundUrl = getClass().getClassLoader().getResource("background.png");
+            Image background = ImageIO.read(backgroundUrl);
+            g.drawImage(background, 0, 0, SlotAdjuster.window.getWidth(), SlotAdjuster.window.getHeight(), null);
+        } catch (Exception e) {
+
+        }
+
+        //EinstellButton
+        JButton einstell = new JButton("Slot Einstellen");
+        einstell.setBounds(getWindowWidth() / 2 - getWindowWidth() / 4, getWindowHeight() / 2 - getWindowHeight() / 5, getWindowWidth() / 2, getWindowHeight() / 9);
+        einstell.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    int dropper = Integer.parseInt(answer.getText());
-                    clearWindow();
-                    SlotAdjuster.currentScreen = new SlotAdjustorScreen(dropper);
-                }catch (Exception exception){}
+                clearWindow();
+                setCurrentScreen(new ChooseAmountLampsScreen("slotchanceadjuster"));
             }
         });
+        einstell.setFont(size);
+        einstell.setBackground(Color.GRAY);
+        einstell.setForeground(Color.WHITE);
+        einstell.setBorderPainted(true);
+        addElement(einstell);
+        einstell.repaint();
 
-        question.setBounds(getWindowWidth()/2 - 150,getWindowHeight()/2-150,200,20);
-        answer.setBounds(getWindowWidth()/2 +40,getWindowHeight()/2-150,20,20);
-        next.setBounds(getWindowWidth()/2 -150,getWindowHeight()/2-120,80,20);
+        //Slot-Berechnen-Button
 
+        JButton slotBerechnenButton = new JButton("Slot Chancen Berechnen");
+        slotBerechnenButton.setBackground(Color.GRAY);
+        slotBerechnenButton.setForeground(Color.WHITE);
+        slotBerechnenButton.setFont(size);
+        slotBerechnenButton.setBorderPainted(true);
+        slotBerechnenButton.setBounds(getWindowWidth() / 2 - getWindowWidth() / 4, getWindowHeight() / 2 - (getWindowHeight() / 5) + (getWindowHeight() / 7), getWindowWidth() / 2, getWindowHeight() / 9);
+        slotBerechnenButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearWindow();
+                setCurrentScreen(new ChooseAmountLampsScreen("slotchance"));
+            }
+        });
+        addElement(slotBerechnenButton);
+        slotBerechnenButton.repaint();
 
-        addElement(question);
-        addElement(answer);
-        addElement(next);
-
+        //megaSlot
+        JButton megaslotBerechnenButton = new JButton("Mega Slot Berechnen");
+        megaslotBerechnenButton.setBounds(getWindowWidth() / 2 - getWindowWidth() / 4, getWindowHeight() / 2 - (getWindowHeight() / 5) + (getWindowHeight() / 7) * 2, getWindowWidth() / 2, getWindowHeight() / 9);
+        megaslotBerechnenButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearWindow();
+                setCurrentScreen(new ChooseAmountLampsScreen("megaslotchance"));
+            }
+        });
+        megaslotBerechnenButton.setFont(size);
+        megaslotBerechnenButton.setBorderPainted(true);
+        megaslotBerechnenButton.setBackground(Color.GRAY);
+        megaslotBerechnenButton.setForeground(Color.WHITE);
+        addElement(megaslotBerechnenButton);
+        megaslotBerechnenButton.repaint();
 
         SlotAdjuster.window.revalidate();
-        SlotAdjuster.window.repaint();
+        SlotAdjuster.window.revalidate();
+        super.paint(g);
     }
 }
